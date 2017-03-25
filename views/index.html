@@ -1,0 +1,139 @@
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+</head>
+<body>
+<a href="#/aaa">aaa</a>
+<a href="#/bbb">bbb</a>
+<div id="root"></div>
+</body>
+<script src="../index.js"></script>
+<script>
+
+    function view() {
+
+    }
+
+    function HashRouter(json) {
+        var that = this
+        window.addEventListener('hashchange', function () {
+            that.route()
+        }, false);
+
+        this.render = function (view) {
+            if(this.root){
+                this.root.innerHTML = view
+            }
+
+
+        }
+
+        this.go = function (url) {
+            location.hash = url
+        }
+
+
+
+        this.renderTo = function (root) {
+            this.root = root
+            this.route()
+        }
+
+        this.route = function () {
+            var
+                newURL = location.href.match(/#(.+)/);
+
+            newURL = newURL && newURL.length>1 ? newURL[1]:undefined
+
+            for(var i=0;i<json.length;i++){
+
+                if(newURL && json[i].path == newURL){
+                    json[i].cb && json[i].cb(json[i].path)
+                    this.render(json[i].view)
+                }
+            }
+        }
+    }
+
+    function BrowserRouter(json) {
+        this.json = json
+
+        this.onpushstate = function () {
+            for(var i=0;i<json.length;i++){
+
+                if( json[i].path == location.pathname){
+                    json[i].cb && json[i].cb(json[i].path)
+                    this.root.innerHTML = json[i].view
+                }
+            }
+        }
+
+
+        this.push = function (path) {
+            history.pushState({path:path},document.title,path)
+            this.onpushstate()
+        }
+
+        this.renderTo = function (root) {
+            this.root = root
+        }
+    }
+    var aaa = function () {
+        return '<div>'+
+            '<p>hello i ma aaa</p>'+
+            '<div>'
+    }
+
+    var bbb = function () {
+        return '<div>'+
+            '<p>hello i ma bbb</p>'+
+            '<div>'
+    }
+
+
+
+    var router = new HashRouter([
+            {
+                path:'/aaa',
+                cb:function (path) {
+                    console.log('hello i enter',path)
+                },
+                view:aaa()
+            },
+            {
+                path:'/bbb',
+                cb:function (path) {
+                    console.log('hello i enter',path)
+                },
+                view:bbb()
+            }
+        ])
+
+    router.renderTo(document.getElementById('root'))
+
+    var router2 = new BrowserRouter([
+        {
+            path:'/aaa',
+            cb:function (path) {
+                console.log('hello i enter',path)
+            },
+            view:aaa()
+        },
+        {
+            path:'/bbb',
+            cb:function (path) {
+                console.log('hello i enter',path)
+            },
+            view:bbb()
+        }
+    ])
+
+    router2.renderTo(document.getElementById('root'))
+
+
+
+</script>
+</html>
+
+
